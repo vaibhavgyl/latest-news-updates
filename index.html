@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>News App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Poppins', sans-serif;
+            background-color: #101010;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Stronger 3D Parallax Effect */
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://source.unsplash.com/1600x900/?technology,news,city') no-repeat center center/cover;
+            filter: blur(10px);
+            z-index: -1;
+            transition: transform 0.2s ease-out;
+        }
+
+        .background-text {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ff9800;
+            font-size: 25px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.7);
+            z-index: 10;
+            user-select: none;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
+            width: 80%;
+            max-width: 450px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            color: #ff9800;
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        input {
+            width: 90%;
+            padding: 15px;
+            margin: 15px 0;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            text-align: center;
+            outline: none;
+            transition: background 0.3s;
+        }
+
+        input::placeholder {
+            color: #ddd;
+        }
+
+        input:focus {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        button {
+            padding: 15px 25px;
+            border: none;
+            background: linear-gradient(45deg, #ff5722, #ff9800);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            background: linear-gradient(45deg, #ff9800, #e91e63);
+            transform: scale(1.1);
+        }
+
+        #newsContainer {
+            margin-top: 30px;
+            max-height: 400px;
+            overflow-y: auto;
+            text-align: left;
+        }
+
+        .news-item {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 12px;
+            transition: 0.3s;
+        }
+
+        .news-item:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        a {
+            color: #ff5722;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Image and Dynamic Text -->
+    <div class="background"></div>
+    <div class="background-text">This website is made by Shashank Shekhar</div>
+
+    <!-- Main App Container -->
+    <div class="container">
+        <h1>Latest News</h1>
+        <input type="text" id="locationInput" placeholder="Enter City or Country" />
+        <button onclick="fetchNews()">Get News</button>
+        <div id="newsContainer"></div>
+    </div>
+
+    <script>
+        const apiKey = "pub_68083e0f8a6b04b6d74f23562c453825012b5";
+
+        // Fetching News Function
+        async function fetchNews() {
+            const location = document.getElementById("locationInput").value;
+            if (!location) {
+                alert("Please enter a city or country name");
+                return;
+            }
+
+            const url = `https://newsdata.io/api/1/latest?apikey=${apiKey}&q=${location}`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                displayNews(data.results);
+            } catch (error) {
+                console.error("Error fetching news:", error);
+            }
+        }
+
+        // Display News Articles
+        function displayNews(articles) {
+            const newsContainer = document.getElementById("newsContainer");
+            newsContainer.innerHTML = "";
+            if (!articles || articles.length === 0) {
+                newsContainer.innerHTML = "<p>No news found.</p>";
+                return;
+            }
+
+            articles.forEach(article => {
+                const newsItem = document.createElement("div");
+                newsItem.classList.add("news-item");
+                newsItem.innerHTML = `
+                    <h3>${article.title}</h3>
+                    <p>${article.description || "No description available."}</p>
+                    <a href="${article.link}" target="_blank">Read more</a>
+                `;
+                newsContainer.appendChild(newsItem);
+            });
+        }
+
+        // Background Animation with 3D Effect on Mouse Move
+        document.addEventListener("mousemove", (e) => {
+            const x = (e.clientX / window.innerWidth) * 30 - 15; // X-axis movement
+            const y = (e.clientY / window.innerHeight) * 30 - 15; // Y-axis movement
+            const background = document.querySelector(".background");
+            background.style.transform = `scale(1.2) translate3d(${x}px, ${y}px, 0) rotateX(${y / 10}deg) rotateY(${x / 10}deg)`;
+        });
+    </script>
+
+</body>
+</html>
